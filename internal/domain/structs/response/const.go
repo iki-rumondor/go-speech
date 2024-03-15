@@ -9,7 +9,7 @@ type HttpResponse struct {
 var (
 	HANDLER_INTERR = &Error{
 		Code:    500,
-		Message: "HttpError: Terjadi Kesalahan Sistem",
+		Message: "HandlerError: Terjadi Kesalahan Sistem",
 	}
 
 	SERVICE_INTERR = &Error{

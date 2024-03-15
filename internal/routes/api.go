@@ -18,15 +18,22 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		MaxAge:           12,
 	}))
 
-	router.GET("/")
-
 	public := router.Group("api")
 	{
-		public.GET("/endpoints")
-		public.POST("/endpoints")
-		public.GET("/endpoints:id")
-		public.PUT("/endpoints/:id")
-		public.DELETE("/endpoints/:id")
+		public.POST("/user", handlers.UserHandler.CreateUser)
+		public.GET("/user/:uuid", handlers.UserHandler.GetUser)
+		public.POST("/verify-user", handlers.UserHandler.VerifyUser)
+		public.GET("/roles", handlers.UserHandler.GetRoles)
+		public.GET("/department", handlers.MasterHandler.GetAllDepartment)
+	}
+
+	admin := router.Group("api")
+	{
+		admin.POST("/class", handlers.MasterHandler.CreateClass)
+		admin.POST("/department", handlers.MasterHandler.CreateDepartment)
+		admin.GET("/department/:uuid", handlers.MasterHandler.GetDepartment)
+		admin.PUT("/department/:uuid", handlers.MasterHandler.UpdateDepartment)
+		admin.DELETE("/department/:uuid", handlers.MasterHandler.DeleteDepartment)
 	}
 
 	return router

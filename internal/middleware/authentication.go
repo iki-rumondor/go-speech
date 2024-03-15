@@ -20,7 +20,11 @@ func IsValidJWT() gin.HandlerFunc {
 		}
 
 		jwt := strings.Split(headerToken, " ")[1]
-
+		if jwt == "null" {
+			utils.HandleError(c, response.UNAUTH_ERR("Token Tidak Valid"))
+			return
+		}
+		
 		mapClaims, err := utils.VerifyToken(jwt)
 		if err != nil {
 			utils.HandleError(c, response.UNAUTH_ERR("Token Tidak Valid"))

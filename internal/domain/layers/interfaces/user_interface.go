@@ -1,6 +1,6 @@
 package interfaces
 
-type MasterInterface interface {
+type UserInterface interface {
 	Find(dest interface{}, condition, order string) error
 	First(dest interface{}, condition string) error
 	Truncate(tableName string) error
