@@ -47,6 +47,23 @@ func (h *MasterHandler) CreateClass(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.SUCCESS_RES("Kelas Berhasil Ditambahkan"))
 }
 
+func (h *MasterHandler) DeleteClass(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+
+	uuid := c.Param("uuid")
+
+	if err := h.Service.DeleteClass(userUuid, uuid); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Kelas Berhasil Dihapus"))
+}
+
 func (h *MasterHandler) CreateDepartment(c *gin.Context) {
 	var body request.Department
 	if err := c.BindJSON(&body); err != nil {
@@ -109,6 +126,22 @@ func (h *MasterHandler) GetAllDepartment(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }
 
+func (h *MasterHandler) GetClasses(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+
+	resp, err := h.Service.GetClasses(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
 func (h *MasterHandler) GetDepartment(c *gin.Context) {
 
 	uuid := c.Param("uuid")
@@ -119,4 +152,46 @@ func (h *MasterHandler) GetDepartment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *MasterHandler) GetClass(c *gin.Context) {
+	uuid := c.Param("uuid")
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+	resp, err := h.Service.GetClass(userUuid, uuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *MasterHandler) UpdateClass(c *gin.Context) {
+	var body request.Class
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	uuid := c.Param("uuid")
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+	if err := h.Service.UpdateClass(userUuid, uuid, &body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Program Studi Berhasil Diperbarui"))
 }

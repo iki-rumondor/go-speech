@@ -83,3 +83,113 @@ func (h *UserHandler) GetRoles(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }
+
+func (h *UserHandler) GetTeachers(c *gin.Context) {
+
+	resp, err := h.Service.GetTeachers()
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) ActivateUser(c *gin.Context) {
+	uuid := c.Param("uuid")
+	if err := h.Service.ActivateUser(uuid); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Aktivasi User Berhasil"))
+}
+
+func (h *UserHandler) GetAllClasses(c *gin.Context) {
+
+	resp, err := h.Service.GetAllClasses()
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) CreateClassRequest(c *gin.Context) {
+	var body request.ClassRequest
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+
+	if err := h.Service.CreateClassRequest(userUuid, &body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Berhasil Mendaftar Di Kelas"))
+}
+
+func (h *UserHandler) GetStudentRequestClasses(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+	resp, err := h.Service.GetStudentRequestClasses(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) GetRequestClasses(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	if userUuid == "" {
+		utils.HandleError(c, response.HANDLER_INTERR)
+		return
+	}
+	resp, err := h.Service.GetRequestClasses(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) UpdateStatusClassReq(c *gin.Context) {
+	var body request.StatusClassReq
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	uuid := c.Param("uuid")
+
+	if err := h.Service.UpdateStatusClassReq(uuid, &body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Berhasil Mendaftar Di Kelas"))
+}

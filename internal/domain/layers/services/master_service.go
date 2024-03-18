@@ -8,6 +8,7 @@ import (
 	"github.com/iki-rumondor/go-speech/internal/domain/structs/models"
 	"github.com/iki-rumondor/go-speech/internal/domain/structs/request"
 	"github.com/iki-rumondor/go-speech/internal/domain/structs/response"
+	"github.com/iki-rumondor/go-speech/internal/utils"
 )
 
 type MasterService struct {
@@ -35,6 +36,32 @@ func (s *MasterService) CreateClass(userUuid string, req *request.Class) error {
 	}
 
 	if err := s.Repo.Create(&model); err != nil {
+		log.Println(err)
+		if utils.IsErrorType(err) {
+			return err
+		}
+		return response.SERVICE_INTERR
+	}
+	return nil
+}
+
+func (s *MasterService) DeleteClass(userUuid, classUuid string) error {
+
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	var model models.Class
+	condition = fmt.Sprintf("teacher_id = '%d' AND uuid = '%s'", user.Teacher.ID, classUuid)
+	if err := s.Repo.First(&model, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	if err := s.Repo.Delete(&model, nil); err != nil {
 		log.Println(err)
 		return response.SERVICE_INTERR
 	}
@@ -105,6 +132,33 @@ func (s *MasterService) GetAllDepartment() (*[]response.Department, error) {
 	return &resp, nil
 }
 
+func (s *MasterService) GetClasses(userUuid string) (*[]response.Class, error) {
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var model []models.Class
+	condition = fmt.Sprintf("teacher_id = '%d'", user.Teacher.ID)
+	if err := s.Repo.Find(&model, condition, "id"); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp []response.Class
+	for _, item := range model {
+		resp = append(resp, response.Class{
+			Uuid: item.Uuid,
+			Name: item.Name,
+			Code: item.Code,
+		})
+	}
+
+	return &resp, nil
+}
+
 func (s *MasterService) GetDepartment(uuid string) (*response.Department, error) {
 
 	var model models.Department
@@ -120,4 +174,57 @@ func (s *MasterService) GetDepartment(uuid string) (*response.Department, error)
 	}
 
 	return &resp, nil
+}
+
+func (s *MasterService) GetClass(userUuid, uuid string) (*response.Class, error) {
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var model models.Class
+
+	condition = fmt.Sprintf("uuid = '%s' AND teacher_id = '%d'", uuid, user.Teacher.ID)
+	if err := s.Repo.First(&model, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp = response.Class{
+		Uuid: model.Uuid,
+		Name: model.Name,
+		Code: model.Code,
+	}
+
+	return &resp, nil
+}
+
+func (s *MasterService) UpdateClass(userUuid, uuid string, req *request.Class) error {
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	var class models.Class
+	condition = fmt.Sprintf("uuid = '%s' AND teacher_id = '%d'", uuid, user.Teacher.ID)
+	if err := s.Repo.First(&class, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	model := models.Class{
+		ID:   class.ID,
+		Name: req.Name,
+		Code: req.Code,
+	}
+
+	if err := s.Repo.Update(&model, ""); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+	return nil
 }

@@ -14,5 +14,6 @@ func GetAllModels() []Model {
 		{Model: models.Teacher{}},
 		{Model: models.Student{}},
 		{Model: models.Class{}},
+		{Model: models.ClassRequest{}},
 	}
 }

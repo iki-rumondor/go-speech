@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/iki-rumondor/go-speech/internal/domain/layers/interfaces"
+	"github.com/iki-rumondor/go-speech/internal/domain/structs/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -45,3 +46,12 @@ func (r *UserRepo) Distinct(model interface{}, column, condition string, dest *[
 func (r *UserRepo) Truncate(tableName string) error {
 	return r.db.Exec(fmt.Sprintf("TRUNCATE TABLE %s", tableName)).Error
 }
+
+func (r *UserRepo) FindClasses(model *[]models.Class, condition string) error {
+	return r.db.Preload(clause.Associations).Preload("Teacher.User").Preload("Teacher.Department").Find(model, condition).Error
+}
+
+// func (r *UserRepo) FindTeacherClassReq(dest *[]models.ClassRequest, teacherID uint) error {
+// 	subQuery := r.db.Model(&models.Class{}).Where("academic_year_id = ?", yearID).Select("facility_id")
+// 	return r.db.Preload(clause.Associations).Preload("Teacher.User").Preload("Teacher.Department").Find(model, condition).Error
+// }

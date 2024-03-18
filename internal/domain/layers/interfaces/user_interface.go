@@ -1,5 +1,7 @@
 package interfaces
 
+import "github.com/iki-rumondor/go-speech/internal/domain/structs/models"
+
 type UserInterface interface {
 	Find(dest interface{}, condition, order string) error
 	First(dest interface{}, condition string) error
@@ -8,4 +10,6 @@ type UserInterface interface {
 	Create(data interface{}) error
 	Update(data interface{}, condition string) error
 	Delete(data interface{}, withAssociation []string) error
+
+	FindClasses(model *[]models.Class, condition string) error
 }

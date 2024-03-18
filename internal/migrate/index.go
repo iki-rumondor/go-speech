@@ -40,6 +40,8 @@ func freshDatabase(db *gorm.DB) error {
 		Name: "ADMIN",
 		User: &[]models.User{
 			{
+				Active:   true,
+				Name:     "Administrator",
 				Email:    "admin@admin.com",
 				Password: "123",
 			},
