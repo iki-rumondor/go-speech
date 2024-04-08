@@ -1,8 +1,16 @@
 package repositories
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 
+	aai "github.com/AssemblyAI/assemblyai-go-sdk"
 	"github.com/iki-rumondor/go-speech/internal/domain/layers/interfaces"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -44,4 +52,111 @@ func (r *MasterRepo) Distinct(model interface{}, column, condition string, dest 
 
 func (r *MasterRepo) Truncate(tableName string) error {
 	return r.db.Exec(fmt.Sprintf("TRUNCATE TABLE %s", tableName)).Error
+}
+
+func (r *MasterRepo) AudioToTextAPI(audioUrl string) error {
+	assemblyKey := os.Getenv("ASSEMBLY_KEY")
+	if assemblyKey == "" {
+		return errors.New("assembly env not found")
+	}
+
+	apiUrl := "https://api.assemblyai.com/v2/transcript"
+
+	values := map[string]string{"audio_url": audioUrl}
+	jsonData, err := json.Marshal(values)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", assemblyKey)
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	transcript, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Transcript:", string(transcript))
+
+	return nil
+}
+
+func (r *MasterRepo) AudioToSubtitleTranscript(audioUrl string) ([]byte, error) {
+	assemblyKey := os.Getenv("ASSEMBLY_KEY")
+	if assemblyKey == "" {
+		return nil, errors.New("assembly env not found")
+	}
+
+	ctx := context.Background()
+
+	client := aai.NewClient(assemblyKey)
+
+	transcript, err := client.Transcripts.TranscribeFromURL(ctx, audioUrl, &aai.TranscriptOptionalParams{
+		// LanguageDetection: aai.Bool(true),
+	})
+
+	// log.Println(aai.ToString(transcript.Text))
+
+	if err != nil {
+		return nil, err
+	}
+
+	params := &aai.TranscriptGetSubtitlesOptions{
+		CharsPerCaption: 32,
+	}
+
+	vtt, err := client.Transcripts.GetSubtitles(ctx, aai.ToString(transcript.ID), "vtt", params)
+	if err != nil {
+		return nil, err
+	}
+
+	return vtt, nil
+}
+
+func (r *MasterRepo) UploadAudio(audioPath string) (map[string]interface{}, error) {
+	assemblyKey := os.Getenv("ASSEMBLY_KEY")
+	if assemblyKey == "" {
+		return nil, errors.New("assembly env not found")
+	}
+
+	apiUrl := "https://api.assemblyai.com/v2/upload"
+
+	audioFile, err := os.ReadFile(audioPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", apiUrl, bytes.NewBuffer(audioFile))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", assemblyKey)
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	return result, nil
 }

@@ -15,5 +15,6 @@ func GetAllModels() []Model {
 		{Model: models.Student{}},
 		{Model: models.Class{}},
 		{Model: models.ClassRequest{}},
+		{Model: models.Video{}},
 	}
 }

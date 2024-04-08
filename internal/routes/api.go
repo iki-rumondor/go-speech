@@ -49,6 +49,9 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		teacher.DELETE("/classes/:uuid", handlers.MasterHandler.DeleteClass)
 		teacher.GET("/classes/request", handlers.UserHandler.GetRequestClasses)
 		teacher.PATCH("/classes/:uuid/request", handlers.UserHandler.UpdateStatusClassReq)
+
+		teacher.POST("/videos", handlers.FileHandler.CreateVideo)
+		teacher.GET("/videos/classes/:uuid", handlers.FileHandler.GetClassVideos)
 	}
 
 	student := router.Group("api").Use(middleware.IsValidJWT(), middleware.IsRole("MAHASISWA"), middleware.SetUserUuid())

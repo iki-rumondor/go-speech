@@ -12,3 +12,11 @@ type Department struct {
 	Uuid string `json:"uuid"`
 	Name string `json:"name"`
 }
+
+type Video struct {
+	Uuid         string `json:"uuid"`
+	Title        string `json:"title"`
+	Description  string `json:"description"`
+	VideoName    string `json:"video_name"`
+	SubtitleName string `json:"subtitle_name"`
+}
