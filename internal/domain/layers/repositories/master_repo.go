@@ -12,6 +12,7 @@ import (
 
 	aai "github.com/AssemblyAI/assemblyai-go-sdk"
 	"github.com/iki-rumondor/go-speech/internal/domain/layers/interfaces"
+	"github.com/iki-rumondor/go-speech/internal/domain/structs/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -52,6 +53,11 @@ func (r *MasterRepo) Distinct(model interface{}, column, condition string, dest 
 
 func (r *MasterRepo) Truncate(tableName string) error {
 	return r.db.Exec(fmt.Sprintf("TRUNCATE TABLE %s", tableName)).Error
+}
+
+func (r *MasterRepo) FindStudentClasses(studentID uint, dest *[]models.Class) error {
+	subQuery := r.db.Model(&models.ClassRequest{}).Where("student_id = ? AND status = ?", studentID, 2).Select("class_id")
+	return r.db.Find(dest, "id IN (?)", subQuery).Error
 }
 
 func (r *MasterRepo) AudioToTextAPI(audioUrl string) error {

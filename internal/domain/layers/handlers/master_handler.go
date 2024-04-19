@@ -142,6 +142,17 @@ func (h *MasterHandler) GetClasses(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }
 
+func (h *MasterHandler) GetStudentClasses(c *gin.Context) {
+	userUuid := c.Param("userUuid")
+	resp, err := h.Service.GetStudentClasses(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
 func (h *MasterHandler) GetDepartment(c *gin.Context) {
 
 	uuid := c.Param("uuid")
@@ -156,12 +167,7 @@ func (h *MasterHandler) GetDepartment(c *gin.Context) {
 
 func (h *MasterHandler) GetClass(c *gin.Context) {
 	uuid := c.Param("uuid")
-	userUuid := c.GetString("uuid")
-	if userUuid == "" {
-		utils.HandleError(c, response.HANDLER_INTERR)
-		return
-	}
-	resp, err := h.Service.GetClass(userUuid, uuid)
+	resp, err := h.Service.GetClass(uuid)
 	if err != nil {
 		utils.HandleError(c, err)
 		return
@@ -194,4 +200,35 @@ func (h *MasterHandler) UpdateClass(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.SUCCESS_RES("Program Studi Berhasil Diperbarui"))
+}
+
+func (h *MasterHandler) CreateNote(c *gin.Context) {
+	var body request.Note
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if err := h.Service.CreateNote(&body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.SUCCESS_RES("Catatan Berhasil Ditambahkan"))
+}
+
+func (h *MasterHandler) GetNotes(c *gin.Context) {
+	classUuid := c.Param("uuid")
+	resp, err := h.Service.GetNotes(classUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }

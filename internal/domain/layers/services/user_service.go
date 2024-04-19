@@ -237,6 +237,16 @@ func (s *UserService) CreateClassRequest(userUuid string, req *request.ClassRequ
 		return response.SERVICE_INTERR
 	}
 
+	var classRequest *models.ClassRequest
+	condition = fmt.Sprintf("student_id = '%d' AND class_id = '%d'", user.Student.ID, class.ID)
+	if err := s.Repo.First(&classRequest, condition); err == nil {
+		message := "Anda Sudah Mendaftar Untuk Kelas Ini, Harap Menunggu Konfirmasi Dari Dosen"
+		if classRequest.Status == 2 {
+			message = "Anda Sudah Terdaftar Di Kelas Ini, Silahkan Akses Dashboard Anda"
+		}
+		return response.BADREQ_ERR(message)
+	}
+
 	model := models.ClassRequest{
 		StudentID: user.Student.ID,
 		ClassID:   class.ID,

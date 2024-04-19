@@ -8,3 +8,9 @@ type Class struct {
 type Department struct {
 	Name string `json:"name" valid:"required~field nama tidak ditemukan"`
 }
+
+type Note struct {
+	ClassUuid string `json:"class_uuid" valid:"required~field uuid class tidak ditemukan"`
+	Title     string `json:"title" valid:"required~field judul tidak ditemukan"`
+	Body      string `json:"body" valid:"required~field body tidak ditemukan"`
+}

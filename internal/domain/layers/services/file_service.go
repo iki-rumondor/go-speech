@@ -94,6 +94,28 @@ func (s *FileService) CreateVideo(pathFile, videoName, title, description, class
 	return nil
 }
 
+func (s *FileService) CreateBook(fileName, title, description, classUuid string) error {
+	var class models.Class
+	condition := fmt.Sprintf("uuid = '%s'", classUuid)
+	if err := s.Repo.First(&class, condition); err != nil {
+		return response.NOTFOUND_ERR("Kelas Tidak Ditemukan")
+	}
+
+	model := models.Book{
+		ClassID:     class.ID,
+		Title:       title,
+		Description: description,
+		FileName:    fileName,
+	}
+
+	if err := s.Repo.Create(&model); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	return nil
+}
+
 func (s *FileService) GetClassVideos(classUuid string) (*[]response.Video, error) {
 
 	var class models.Class
@@ -119,6 +141,74 @@ func (s *FileService) GetClassVideos(classUuid string) (*[]response.Video, error
 			VideoName:    item.VideoName,
 			SubtitleName: item.SubtitleName,
 		})
+	}
+
+	return &resp, nil
+}
+
+func (s *FileService) GetClassBooks(classUuid string) (*[]response.Book, error) {
+
+	var class models.Class
+	condition := fmt.Sprintf("uuid = '%s'", classUuid)
+	if err := s.Repo.First(&class, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var model []models.Book
+	condition = fmt.Sprintf("class_id = '%d'", class.ID)
+	if err := s.Repo.Find(&model, condition, "id"); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp []response.Book
+	for _, item := range model {
+		resp = append(resp, response.Book{
+			Uuid:        item.Uuid,
+			Title:       item.Title,
+			Description: item.Description,
+			FileName:    item.FileName,
+		})
+	}
+
+	return &resp, nil
+}
+
+func (s *FileService) GetVideo(uuid string) (*response.Video, error) {
+
+	var model models.Video
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&model, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp = response.Video{
+		Uuid:         model.Uuid,
+		Title:        model.Title,
+		Description:  model.Description,
+		VideoName:    model.VideoName,
+		SubtitleName: model.SubtitleName,
+	}
+
+	return &resp, nil
+}
+
+func (s *FileService) GetBook(uuid string) (*response.Book, error) {
+
+	var model models.Book
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&model, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp = response.Book{
+		Uuid:        model.Uuid,
+		Title:       model.Title,
+		Description: model.Description,
+		FileName:    model.FileName,
 	}
 
 	return &resp, nil

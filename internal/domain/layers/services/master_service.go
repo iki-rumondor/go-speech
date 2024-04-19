@@ -159,6 +159,32 @@ func (s *MasterService) GetClasses(userUuid string) (*[]response.Class, error) {
 	return &resp, nil
 }
 
+func (s *MasterService) GetStudentClasses(userUuid string) (*[]response.Class, error) {
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var model []models.Class
+	if err := s.Repo.FindStudentClasses(user.Student.ID, &model); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp []response.Class
+	for _, item := range model {
+		resp = append(resp, response.Class{
+			Uuid: item.Uuid,
+			Name: item.Name,
+			Code: item.Code,
+		})
+	}
+
+	return &resp, nil
+}
+
 func (s *MasterService) GetDepartment(uuid string) (*response.Department, error) {
 
 	var model models.Department
@@ -176,17 +202,10 @@ func (s *MasterService) GetDepartment(uuid string) (*response.Department, error)
 	return &resp, nil
 }
 
-func (s *MasterService) GetClass(userUuid, uuid string) (*response.Class, error) {
-	var user models.User
-	condition := fmt.Sprintf("uuid = '%s'", userUuid)
-	if err := s.Repo.First(&user, condition); err != nil {
-		log.Println(err)
-		return nil, response.SERVICE_INTERR
-	}
+func (s *MasterService) GetClass(uuid string) (*response.Class, error) {
 
 	var model models.Class
-
-	condition = fmt.Sprintf("uuid = '%s' AND teacher_id = '%d'", uuid, user.Teacher.ID)
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
 	if err := s.Repo.First(&model, condition); err != nil {
 		log.Println(err)
 		return nil, response.SERVICE_INTERR
@@ -227,4 +246,54 @@ func (s *MasterService) UpdateClass(userUuid, uuid string, req *request.Class) e
 		return response.SERVICE_INTERR
 	}
 	return nil
+}
+
+func (s *MasterService) CreateNote(req *request.Note) error {
+	var class models.Class
+	condition := fmt.Sprintf("uuid = '%s'", req.ClassUuid)
+	if err := s.Repo.First(&class, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	model := models.Note{
+		Title:   req.Title,
+		Body:    req.Body,
+		ClassID: class.ID,
+	}
+
+	if err := s.Repo.Create(&model); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+	return nil
+}
+
+func (s *MasterService) GetNotes(classUuid string) (*[]response.Note, error) {
+
+	var class models.Class
+	condition := fmt.Sprintf("uuid = '%s'", classUuid)
+	if err := s.Repo.First(&class, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var notes []models.Note
+	condition = fmt.Sprintf("class_id = '%d'", class.ID)
+	if err := s.Repo.Find(&notes, condition, "created_at desc"); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp []response.Note
+	for _, item := range notes {
+		resp = append(resp, response.Note{
+			Uuid:      item.Uuid,
+			Title:     item.Title,
+			Body:      item.Body,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return &resp, nil
 }

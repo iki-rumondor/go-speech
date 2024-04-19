@@ -27,6 +27,20 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		public.GET("/public/classes", handlers.UserHandler.GetAllClasses)
 		public.GET("/roles", handlers.UserHandler.GetRoles)
 		public.GET("/department", handlers.MasterHandler.GetAllDepartment)
+		public.GET("/file/videos/:videoName", handlers.FileHandler.GetFileVideo)
+		public.GET("/file/subtitle/:subtitle", handlers.FileHandler.GetFileSubtitle)
+		public.GET("/file/books/:bookName", handlers.FileHandler.GetFileBook)
+
+	}
+
+	user := router.Group("api").Use(middleware.IsValidJWT())
+	{
+		user.GET("/videos/:uuid", handlers.FileHandler.GetVideo)
+		user.GET("/videos/classes/:uuid", handlers.FileHandler.GetClassVideos)
+		user.GET("/classes/:uuid", handlers.MasterHandler.GetClass)
+		user.GET("/books/classes/:uuid", handlers.FileHandler.GetClassBooks)
+		user.GET("/books/:uuid", handlers.FileHandler.GetVideo)
+		user.GET("/notes/classes/:uuid", handlers.MasterHandler.GetNotes)
 	}
 
 	admin := router.Group("api").Use(middleware.IsValidJWT(), middleware.IsRole("ADMIN"))
@@ -44,20 +58,21 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 	{
 		teacher.POST("/classes", handlers.MasterHandler.CreateClass)
 		teacher.GET("/classes", handlers.MasterHandler.GetClasses)
-		teacher.GET("/classes/:uuid", handlers.MasterHandler.GetClass)
 		teacher.PUT("/classes/:uuid", handlers.MasterHandler.UpdateClass)
 		teacher.DELETE("/classes/:uuid", handlers.MasterHandler.DeleteClass)
 		teacher.GET("/classes/request", handlers.UserHandler.GetRequestClasses)
 		teacher.PATCH("/classes/:uuid/request", handlers.UserHandler.UpdateStatusClassReq)
 
 		teacher.POST("/videos", handlers.FileHandler.CreateVideo)
-		teacher.GET("/videos/classes/:uuid", handlers.FileHandler.GetClassVideos)
+		teacher.POST("/books", handlers.FileHandler.CreateBook)
+		teacher.POST("/notes", handlers.MasterHandler.CreateNote)
 	}
 
 	student := router.Group("api").Use(middleware.IsValidJWT(), middleware.IsRole("MAHASISWA"), middleware.SetUserUuid())
 	{
 		student.POST("/class/register", handlers.UserHandler.CreateClassRequest)
 		student.GET("/class/request/students", handlers.UserHandler.GetStudentRequestClasses)
+		student.GET("/classes/students/:userUuid", handlers.MasterHandler.GetStudentClasses)
 	}
 
 	return router

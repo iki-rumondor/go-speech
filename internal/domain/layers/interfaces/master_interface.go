@@ -1,5 +1,7 @@
 package interfaces
 
+import "github.com/iki-rumondor/go-speech/internal/domain/structs/models"
+
 type MasterInterface interface {
 	Find(dest interface{}, condition, order string) error
 	First(dest interface{}, condition string) error
@@ -8,6 +10,9 @@ type MasterInterface interface {
 	Create(data interface{}) error
 	Update(data interface{}, condition string) error
 	Delete(data interface{}, withAssociation []string) error
+
+	FindStudentClasses(studentID uint, dest *[]models.Class) error
+
 	UploadAudio(audioPath string) (map[string]interface{}, error)
 	AudioToTextAPI(audioPath string) error
 	AudioToSubtitleTranscript(audioUrl string) ([]byte, error)

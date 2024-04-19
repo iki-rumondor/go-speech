@@ -20,3 +20,17 @@ type Video struct {
 	VideoName    string `json:"video_name"`
 	SubtitleName string `json:"subtitle_name"`
 }
+
+type Book struct {
+	Uuid        string `json:"uuid"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	FileName    string `json:"file_name"`
+}
+
+type Note struct {
+	Uuid      string `json:"uuid"`
+	Title     string `json:"title"`
+	Body      string `json:"body"`
+	CreatedAt int64  `json:"created_at"`
+}
