@@ -232,3 +232,46 @@ func (h *MasterHandler) GetNotes(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }
+
+func (h *MasterHandler) GetNote(c *gin.Context) {
+	uuid := c.Param("uuid")
+	resp, err := h.Service.GetNote(uuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *MasterHandler) UpdateNote(c *gin.Context) {
+	var body request.Note
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	uuid := c.Param("uuid")
+	if err := h.Service.UpdateNote(uuid, &body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.SUCCESS_RES("Catatan Berhasil Diperbarui"))
+}
+
+func (h *MasterHandler) DeleteNote(c *gin.Context) {
+
+	uuid := c.Param("uuid")
+	if err := h.Service.DeleteNote(uuid); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.SUCCESS_RES("Catatan Berhasil Dihapus"))
+}

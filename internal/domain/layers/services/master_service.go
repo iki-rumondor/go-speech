@@ -297,3 +297,58 @@ func (s *MasterService) GetNotes(classUuid string) (*[]response.Note, error) {
 
 	return &resp, nil
 }
+
+func (s *MasterService) GetNote(uuid string) (*response.Note, error) {
+
+	var note models.Note
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&note, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var resp = response.Note{
+		Uuid:      note.Uuid,
+		Title:     note.Title,
+		Body:      note.Body,
+		CreatedAt: note.CreatedAt,
+	}
+
+	return &resp, nil
+}
+
+func (s *MasterService) UpdateNote(uuid string, req *request.Note) error {
+	var note models.Note
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&note, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	model := models.Note{
+		ID:    note.ID,
+		Title: req.Title,
+		Body:  req.Body,
+	}
+
+	if err := s.Repo.Update(&model, ""); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+	return nil
+}
+
+func (s *MasterService) DeleteNote(uuid string) error {
+	var note models.Note
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&note, condition); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	if err := s.Repo.Delete(&note, nil); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+	return nil
+}
