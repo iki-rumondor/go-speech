@@ -26,6 +26,8 @@ type Book struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	FileName    string `json:"file_name"`
+	Teacher     string `json:"teacher"`
+	CreatedAt   int64  `json:"created_at"`
 }
 
 type Note struct {

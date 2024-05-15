@@ -116,6 +116,28 @@ func (s *FileService) CreateBook(fileName, title, description, classUuid string)
 	return nil
 }
 
+func (s *FileService) DeleteBook(uuid string) error {
+	var book models.Book
+	condition := fmt.Sprintf("uuid = '%s'", uuid)
+	if err := s.Repo.First(&book, condition); err != nil {
+		return response.SERVICE_INTERR
+	}
+
+	if err := s.Repo.Delete(&book, nil); err != nil {
+		log.Println(err)
+		return response.SERVICE_INTERR
+	}
+
+	folder := "internal/files/books"
+	pathFile := filepath.Join(folder, book.FileName)
+
+	if err := os.Remove(pathFile); err != nil {
+		log.Println(err.Error())
+	}
+
+	return nil
+}
+
 func (s *FileService) GetClassVideos(classUuid string) (*[]response.Video, error) {
 
 	var class models.Class
@@ -155,6 +177,13 @@ func (s *FileService) GetClassBooks(classUuid string) (*[]response.Book, error) 
 		return nil, response.SERVICE_INTERR
 	}
 
+	var teacher models.Teacher
+	condition = fmt.Sprintf("id = '%d'", class.TeacherID)
+	if err := s.Repo.First(&teacher, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
 	var model []models.Book
 	condition = fmt.Sprintf("class_id = '%d'", class.ID)
 	if err := s.Repo.Find(&model, condition, "id"); err != nil {
@@ -169,6 +198,8 @@ func (s *FileService) GetClassBooks(classUuid string) (*[]response.Book, error) 
 			Title:       item.Title,
 			Description: item.Description,
 			FileName:    item.FileName,
+			Teacher:     teacher.User.Name,
+			CreatedAt:   item.CreatedAt,
 		})
 	}
 

@@ -122,6 +122,16 @@ func (h *FileHandler) CreateBook(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.SUCCESS_RES("Berhasil Menambahkan Buku Pembelajaran"))
 }
 
+func (h *FileHandler) DeleteBook(c *gin.Context) {
+	uuid := c.Param("uuid")
+	if err := h.Service.DeleteBook(uuid); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, response.SUCCESS_RES("Berhasil Menambahkan Buku Pembelajaran"))
+}
+
 func (h *FileHandler) GetClassVideos(c *gin.Context) {
 	classUuid := c.Param("uuid")
 	resp, err := h.Service.GetClassVideos(classUuid)
