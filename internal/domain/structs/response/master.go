@@ -19,6 +19,8 @@ type Video struct {
 	Description  string `json:"description"`
 	VideoName    string `json:"video_name"`
 	SubtitleName string `json:"subtitle_name"`
+	Teacher      string `json:"teacher"`
+	CreatedAt    int64  `json:"created_at"`
 }
 
 type Book struct {

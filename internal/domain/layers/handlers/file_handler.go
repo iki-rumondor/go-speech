@@ -6,8 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/iki-rumondor/go-speech/internal/domain/layers/services"
+	"github.com/iki-rumondor/go-speech/internal/domain/structs/request"
 	"github.com/iki-rumondor/go-speech/internal/domain/structs/response"
 	"github.com/iki-rumondor/go-speech/internal/utils"
 )
@@ -70,6 +72,38 @@ func (h *FileHandler) CreateVideo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, response.SUCCESS_RES("Berhasil Menambahkan Video Pembelajaran"))
+}
+
+func (h *FileHandler) UpdateVideo(c *gin.Context) {
+	var body request.UpdateVideo
+	if err := c.BindJSON(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	if _, err := govalidator.ValidateStruct(&body); err != nil {
+		utils.HandleError(c, response.BADREQ_ERR(err.Error()))
+		return
+	}
+
+	uuid := c.Param("uuid")
+	if err := h.Service.UpdateVideo(uuid, &body); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Video Berhasil Diperbarui"))
+}
+
+func (h *FileHandler) DeleteVideo(c *gin.Context) {
+
+	uuid := c.Param("uuid")
+	if err := h.Service.DeleteVideo(uuid); err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SUCCESS_RES("Video Berhasil Diperbarui"))
 }
 
 func (h *FileHandler) CreateBook(c *gin.Context) {

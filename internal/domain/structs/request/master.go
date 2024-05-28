@@ -14,3 +14,8 @@ type Note struct {
 	Title     string `json:"title" valid:"required~field judul tidak ditemukan"`
 	Body      string `json:"body" valid:"required~field body tidak ditemukan"`
 }
+
+type UpdateVideo struct {
+	Title       string `json:"title" valid:"required~field judul tidak ditemukan"`
+	Description string `json:"description" valid:"required~field description tidak ditemukan"`
+}

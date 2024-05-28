@@ -64,6 +64,8 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		teacher.PATCH("/classes/:uuid/request", handlers.UserHandler.UpdateStatusClassReq)
 
 		teacher.POST("/videos", handlers.FileHandler.CreateVideo)
+		teacher.PUT("/videos/:uuid", handlers.FileHandler.UpdateVideo)
+		teacher.DELETE("/videos/:uuid", handlers.FileHandler.DeleteVideo)
 
 		teacher.POST("/books", handlers.FileHandler.CreateBook)
 		teacher.DELETE("/books/:uuid", handlers.FileHandler.DeleteBook)
