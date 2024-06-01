@@ -52,6 +52,8 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 
 		admin.GET("/teachers", handlers.UserHandler.GetTeachers)
 		admin.PATCH("/teacher/:uuid/activate", handlers.UserHandler.ActivateUser)
+
+		admin.GET("dashboards/admin", handlers.UserHandler.DashboardAdmin)
 	}
 
 	teacher := router.Group("api").Use(middleware.IsValidJWT(), middleware.IsRole("DOSEN"), middleware.SetUserUuid())
@@ -74,6 +76,8 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		teacher.GET("/notes/:uuid", handlers.MasterHandler.GetNote)
 		teacher.PUT("/notes/:uuid", handlers.MasterHandler.UpdateNote)
 		teacher.DELETE("/notes/:uuid", handlers.MasterHandler.DeleteNote)
+
+		teacher.GET("dashboards/teacher", handlers.UserHandler.DashboardTeacher)
 	}
 
 	student := router.Group("api").Use(middleware.IsValidJWT(), middleware.IsRole("MAHASISWA"), middleware.SetUserUuid())
@@ -81,6 +85,8 @@ func StartServer(handlers *config.Handlers) *gin.Engine {
 		student.POST("/class/register", handlers.UserHandler.CreateClassRequest)
 		student.GET("/class/request/students", handlers.UserHandler.GetStudentRequestClasses)
 		student.GET("/classes/students/:userUuid", handlers.MasterHandler.GetStudentClasses)
+
+		student.GET("dashboards/student", handlers.UserHandler.DashboardStudent)
 	}
 
 	return router

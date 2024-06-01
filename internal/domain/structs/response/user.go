@@ -29,3 +29,20 @@ type RequestClass struct {
 	Status    uint   `json:"status"`
 	CreatedAt int64  `json:"created_at"`
 }
+
+type DashboardAdmin struct {
+	JumlahProdi int `json:"jumlah_prodi"`
+	JumlahDosen int `json:"jumlah_dosen"`
+}
+
+type DashboardTeacher struct {
+	JumlahMahasiswa int `json:"jumlah_mahasiswa"`
+	JumlahKelas     int `json:"jumlah_kelas"`
+	JumlahBuku      int `json:"jumlah_buku"`
+	JumlahVideo     int `json:"jumlah_video"`
+}
+
+type DashboardStudent struct {
+	JumlahKelasVerified int `json:"jumlah_kelas_verified"`
+	JumlahKelasNot      int `json:"jumlah_kelas_not"`
+}

@@ -51,6 +51,21 @@ func (r *UserRepo) FindClasses(model *[]models.Class, condition string) error {
 	return r.db.Preload(clause.Associations).Preload("Teacher.User").Preload("Teacher.Department").Find(model, condition).Error
 }
 
+func (r *UserRepo) FindTeacherStudents(model *[]models.ClassRequest, teacherID uint) error {
+	classIDs := r.db.Model(&models.Class{}).Where("teacher_id = ?", teacherID).Select("id")
+	return r.db.Find(model, "class_id IN (?) AND status = ?", classIDs, 2).Error
+
+}
+
+func (r *UserRepo) SelectColumn(model interface{}, condition, columnName string) *gorm.DB {
+	return r.db.Model(model).Where(condition).Select(columnName)
+}
+
+func (r *UserRepo) Include(model interface{}, condition, colName string, selectCols *gorm.DB) error {
+	conds := fmt.Sprintf("%s IN (?)", colName)
+	return r.db.Where(condition).Find(model, conds, selectCols).Error
+}
+
 // func (r *UserRepo) FindTeacherClassReq(dest *[]models.ClassRequest, teacherID uint) error {
 // 	subQuery := r.db.Model(&models.Class{}).Where("academic_year_id = ?", yearID).Select("facility_id")
 // 	return r.db.Preload(clause.Associations).Preload("Teacher.User").Preload("Teacher.Department").Find(model, condition).Error

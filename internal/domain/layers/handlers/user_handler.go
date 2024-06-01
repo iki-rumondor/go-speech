@@ -157,6 +157,38 @@ func (h *UserHandler) GetStudentRequestClasses(c *gin.Context) {
 	c.JSON(http.StatusOK, response.DATA_RES(resp))
 }
 
+func (h *UserHandler) DashboardAdmin(c *gin.Context) {
+	resp, err := h.Service.DashboardAdmin()
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) DashboardTeacher(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	resp, err := h.Service.DashboardTeacher(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
+func (h *UserHandler) DashboardStudent(c *gin.Context) {
+	userUuid := c.GetString("uuid")
+	resp, err := h.Service.DashboardStudent(userUuid)
+	if err != nil {
+		utils.HandleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.DATA_RES(resp))
+}
+
 func (h *UserHandler) GetRequestClasses(c *gin.Context) {
 	userUuid := c.GetString("uuid")
 	if userUuid == "" {

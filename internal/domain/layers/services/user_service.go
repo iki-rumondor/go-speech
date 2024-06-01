@@ -357,6 +357,104 @@ func (s *UserService) GetRequestClasses(userUuid string) (*[]response.RequestCla
 	return &resp, nil
 }
 
+func (s *UserService) DashboardAdmin() (*response.DashboardAdmin, error) {
+
+	var departments []models.Department
+	if err := s.Repo.Find(&departments, "", ""); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var teacher []models.Teacher
+	if err := s.Repo.Find(&teacher, "", ""); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	resp := response.DashboardAdmin{
+		JumlahProdi: len(departments),
+		JumlahDosen: len(teacher),
+	}
+
+	return &resp, nil
+}
+
+func (s *UserService) DashboardTeacher(userUuid string) (*response.DashboardTeacher, error) {
+
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var class []models.Class
+	condition = fmt.Sprintf("teacher_id = '%d'", user.Teacher.ID)
+	classIDs := s.Repo.SelectColumn(&models.Class{}, condition, "id")
+	if err := s.Repo.Find(&class, condition, ""); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var students []models.ClassRequest
+	if err := s.Repo.FindTeacherStudents(&students, user.Teacher.ID); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var books []models.Book
+	if err := s.Repo.Include(&books, "", "class_id", classIDs); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var videos []models.Video
+	if err := s.Repo.Include(&videos, "", "class_id", classIDs); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	resp := response.DashboardTeacher{
+		JumlahMahasiswa: len(students),
+		JumlahKelas:     len(class),
+		JumlahBuku:      len(books),
+		JumlahVideo:     len(videos),
+	}
+
+	return &resp, nil
+}
+
+func (s *UserService) DashboardStudent(userUuid string) (*response.DashboardStudent, error) {
+
+	var user models.User
+	condition := fmt.Sprintf("uuid = '%s'", userUuid)
+	if err := s.Repo.First(&user, condition); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var classVerified []models.ClassRequest
+	condition = fmt.Sprintf("student_id = '%d' AND status = '%d'", user.Student.ID, 2)
+	if err := s.Repo.Find(&classVerified, condition, ""); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	var classNot []models.ClassRequest
+	condition = fmt.Sprintf("student_id = '%d' AND status = '%d'", user.Student.ID, 0)
+	if err := s.Repo.Find(&classNot, condition, ""); err != nil {
+		log.Println(err)
+		return nil, response.SERVICE_INTERR
+	}
+
+	resp := response.DashboardStudent{
+		JumlahKelasVerified: len(classVerified),
+		JumlahKelasNot:      len(classNot),
+	}
+
+	return &resp, nil
+}
+
 func (s *UserService) UpdateStatusClassReq(uuid string, req *request.StatusClassReq) error {
 
 	var class models.ClassRequest
