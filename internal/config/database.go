@@ -20,7 +20,7 @@ func NewMysqlDB() (*gorm.DB, error) {
 	dbPort := os.Getenv("DBPORT")
 	dbName := os.Getenv("DBNAME")
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbPort, dbName)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local&timeout=5s", dbUser, dbPassword, dbHost, dbPort, dbName)
 	gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err

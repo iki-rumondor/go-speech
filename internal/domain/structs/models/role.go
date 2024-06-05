@@ -2,6 +2,6 @@ package models
 
 type Role struct {
 	ID   uint   `gorm:"primaryKey"`
-	Nama string `gorm:"not_null;size:16"`
+	Name string `gorm:"not_null;size:16"`
 	User *[]User
 }
